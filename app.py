@@ -11,6 +11,7 @@ import os
 import streamlit as st
 
 from src.detector import detect
+from src.file_loader import extract_text
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLES_DIR = os.path.join(BASE_DIR, "data", "samples")
@@ -88,7 +89,7 @@ with st.sidebar:
         disabled=not sbert_available,
     )
     if not sbert_available:
-        backend = "Word2Vec/GloVe" if embedding_files else "None (TF-IDF only)"
+        backend = "Word2Vec/GloVe (baseline)" if embedding_files else "None (TF-IDF only)"
 
     combination = st.selectbox(
         "Combine signals",
@@ -144,10 +145,16 @@ with col1:
         label_visibility="collapsed",
         placeholder="Paste the original / reference document here...",
     )
-    uploaded_a = st.file_uploader("or upload", type=["txt", "md"], key="upload_a")
+    uploaded_a = st.file_uploader(
+        "or upload (.txt, .md, .pdf)", type=["txt", "md", "pdf"], key="upload_a"
+    )
     if uploaded_a is not None:
-        doc_a = uploaded_a.read().decode("utf-8", errors="ignore")
-        st.session_state["doc_a"] = doc_a
+        try:
+            doc_a = extract_text(uploaded_a)
+            st.session_state["doc_a"] = doc_a
+            st.caption(f"Loaded {uploaded_a.name}: {len(doc_a.split()):,} words")
+        except ValueError as err:
+            st.error(str(err))
 
 with col2:
     st.subheader("Document B (suspect)")
@@ -158,10 +165,16 @@ with col2:
         label_visibility="collapsed",
         placeholder="Paste the submission / suspect document here...",
     )
-    uploaded_b = st.file_uploader("or upload", type=["txt", "md"], key="upload_b")
+    uploaded_b = st.file_uploader(
+        "or upload (.txt, .md, .pdf)", type=["txt", "md", "pdf"], key="upload_b"
+    )
     if uploaded_b is not None:
-        doc_b = uploaded_b.read().decode("utf-8", errors="ignore")
-        st.session_state["doc_b"] = doc_b
+        try:
+            doc_b = extract_text(uploaded_b)
+            st.session_state["doc_b"] = doc_b
+            st.caption(f"Loaded {uploaded_b.name}: {len(doc_b.split()):,} words")
+        except ValueError as err:
+            st.error(str(err))
 
 if st.button("Detect Plagiarism", type="primary"):
     if not doc_a.strip() or not doc_b.strip():

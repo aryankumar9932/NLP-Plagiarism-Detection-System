@@ -16,7 +16,7 @@ The two scores are combined into a single similarity score and mapped to a verdi
 
 ## Features
 
-- Paste or upload two documents (`.txt`, `.md`) and compare them.
+- Paste or upload two documents (`.txt`, `.md`, `.pdf`) and compare them.
 - Sample document pairs included for quick demos (identical copy, paraphrase, unrelated).
 - Sentence-level match detection with highlighted similar sentence pairs.
 - Two combination modes: **Max** (report the strongest signal) and **Weighted blend**.
